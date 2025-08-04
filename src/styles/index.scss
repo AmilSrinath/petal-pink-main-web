@@ -1,0 +1,150 @@
+@import "./_theme_colors";
+@import "./_theme_font";
+@import "./_theme_custom";
+//
+@import "./header";
+
+@import "node_modules/@glidejs/glide/src/assets/sass/glide.core";
+
+// Optimized animations with reduced complexity
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float.delay-1000 {
+  animation-delay: 1s;
+}
+
+// Optimized glassmorphism utilities
+.backdrop-blur-md {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+// Optimized gradient text
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+// Optimized transitions
+.transition-all {
+  transition-property: transform, opacity, background-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.2s;
+}
+
+// Reduced shadow complexity
+.shadow-2xl {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+// Optimized hover effects
+.hover\:scale-105:hover {
+  transform: scale(1.02);
+}
+
+.hover\:scale-110:hover {
+  transform: scale(1.05);
+}
+
+// Simplified scrollbar
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8b5cf6;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed;
+}
+
+// Performance optimizations
+* {
+  box-sizing: border-box;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+// Mobile-specific optimizations
+@media (max-width: 640px) {
+  .animate-float {
+    animation-duration: 8s; // Slower animations on mobile
+  }
+  
+  .backdrop-blur-md {
+    backdrop-filter: blur(4px); // Reduced blur on mobile
+    -webkit-backdrop-filter: blur(4px);
+  }
+  
+  .shadow-2xl {
+    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.1); // Lighter shadows on mobile
+  }
+}
+
+// Touch-friendly interactions
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Mobile-first responsive utilities
+@media (min-width: 475px) {
+  .xs\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+// Reduce motion for users who prefer it
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-pulse,
+  .animate-bounce {
+    animation: none;
+  }
+  
+  .transition-all {
+    transition: none;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .bg-gradient-to-r {
+    background: solid;
+  }
+}
+
+// Dark mode optimizations for mobile
+@media (max-width: 640px) and (prefers-color-scheme: dark) {
+  .backdrop-blur-sm {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+}
