@@ -27,6 +27,9 @@ export const useCart = () => {
     return context;
 };
 
+
+
+
 // CartProvider component
 export const CartProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [cart, setCart] = useState<CartItem[]>([]);

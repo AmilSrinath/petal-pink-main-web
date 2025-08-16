@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom/client";
+import ReactDOM, { createRoot } from "react-dom/client";
 import "./styles/index.scss";
 import "./index.css";
 import "./fonts/line-awesome-1.3.0/css/line-awesome.css";
@@ -8,10 +8,7 @@ import { CartProvider } from "./containers/ProductDetailPage/CartContext"; // Ad
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
-const root = ReactDOM.createRoot(
-    document.getElementById("root") as HTMLElement
-);
-root.render(
+createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
         {/* Wrap App with CartProvider */}
         <CartProvider>

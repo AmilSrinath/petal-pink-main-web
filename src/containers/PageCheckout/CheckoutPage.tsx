@@ -1,50 +1,52 @@
-"use client"
+"use client";
 
-import { useCart } from "../ProductDetailPage/CartContext"
-import { useState, useEffect } from "react"
-import ButtonPrimary from "shared/Button/ButtonPrimary"
-import Label from "../../components/Label/Label"
-import Input from "../../shared/Input/Input"
-import { useNavigate } from "react-router-dom"
+import { useCart } from "../ProductDetailPage/CartContext";
+import { useState, useEffect } from "react";
+import ButtonPrimary from "shared/Button/ButtonPrimary";
+import Label from "../../components/Label/Label";
+import Input from "../../shared/Input/Input";
+import { useNavigate } from "react-router-dom";
 
 // Define the types for the product and cart items
 interface Product {
-  product_id: number
-  product_name: string
-  product_price: number
-  image_url: string
-  weight: number // Add weight property
+  product_id: number;
+  product_name: string;
+  product_price: number;
+  image_url: string;
+  weight: number; // Add weight property
 }
 interface CartItem {
-  product: Product
-  quantity: number
+  product: Product;
+  quantity: number;
 }
 
 const CheckoutPage = () => {
-  const { cart, updateQuantity, removeFromCart } = useCart()
-  const navigate = useNavigate()
+  const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
+  const navigate = useNavigate();
 
-  const [isModalOpen, setIsModalOpen] = useState(false) // State to control modal visibility
-  const [orderId, setOrderId] = useState("") // State to store the order ID
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+  const [orderId, setOrderId] = useState(""); // State to store the order ID
 
-  const [fistKillo, setFistKillo] = useState(350) // Initial default value
-  const [secondKillo, setSecondKillo] = useState(70) // Initial default value
-  const [loading, setLoading] = useState(true) // Loading state for fetching config
+  const [fistKillo, setFistKillo] = useState(350); // Initial default value
+  const [secondKillo, setSecondKillo] = useState(70); // Initial default value
+  const [loading, setLoading] = useState(true); // Loading state for fetching config
 
   // Customer details state
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [address1, setAddress1] = useState("")
-  const [address2, setAddress2] = useState("")
-  const [city, setCity] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone1, setPhone1] = useState("")
-  const [phone2, setPhone2] = useState("")
-  const [province, setProvince] = useState("")
-  const [country, setCountry] = useState("Sri Lanka")
-  const [paymentMethod, setPaymentMethod] = useState<"CreditCard" | "CashOnDelivery">("CashOnDelivery")
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [address1, setAddress1] = useState("");
+  const [address2, setAddress2] = useState("");
+  const [city, setCity] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone1, setPhone1] = useState("");
+  const [phone2, setPhone2] = useState("");
+  const [province, setProvince] = useState("");
+  const [country, setCountry] = useState("Sri Lanka");
+  const [paymentMethod, setPaymentMethod] = useState<
+    "CreditCard" | "CashOnDelivery"
+  >("CashOnDelivery");
 
-  const serverUrl = process.env.REACT_APP_API_URL
+  const serverUrl = process.env.REACT_APP_API_URL;
 
   // Validation state
   const [errors, setErrors] = useState({
@@ -55,82 +57,97 @@ const CheckoutPage = () => {
     email: "",
     phone1: "",
     province: "",
-  })
+  });
 
   // Fetch configuration on mount
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch(`${serverUrl}/api/configuration/getAllConfig`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
+        const response = await fetch(
+          `${serverUrl}/api/configuration/getAllConfig`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch configuration")
+          throw new Error("Failed to fetch configuration");
         }
 
-        const data = await response.json()
-        const configs = data.configs
+        const data = await response.json();
+        const configs = data.configs;
 
         // Set fistKillo and secondKillo based on the response
-        const firstKiloConfig = configs.find((config: any) => config.config_name === "price-of-the-first-kilo")
-        const addedKiloConfig = configs.find((config: any) => config.config_name === "price-of-the-added-kilo")
+        const firstKiloConfig = configs.find(
+          (config: any) => config.config_name === "price-of-the-first-kilo"
+        );
+        const addedKiloConfig = configs.find(
+          (config: any) => config.config_name === "price-of-the-added-kilo"
+        );
 
-        if (firstKiloConfig) setFistKillo(Number(firstKiloConfig.config_value))
-        if (addedKiloConfig) setSecondKillo(Number(addedKiloConfig.config_value))
+        if (firstKiloConfig) setFistKillo(Number(firstKiloConfig.config_value));
+        if (addedKiloConfig)
+          setSecondKillo(Number(addedKiloConfig.config_value));
 
-        setLoading(false)
+        setLoading(false);
       } catch (error) {
-        console.error("Error fetching configuration:", error)
-        setLoading(false)
+        console.error("Error fetching configuration:", error);
+        setLoading(false);
       }
-    }
+    };
 
-    fetchConfig()
-  }, [])
+    fetchConfig();
+  }, []);
 
-  const subtotal = cart.reduce((acc: number, item: CartItem) => acc + item.product.product_price * item.quantity, 0)
+  const subtotal = cart.reduce(
+    (acc: number, item: CartItem) =>
+      acc + item.product.product_price * item.quantity,
+    0
+  );
 
   const totalWeight = cart.reduce((acc: number, item: CartItem) => {
-    return acc + item.product.weight * item.quantity
-  }, 0)
+    return acc + item.product.weight * item.quantity;
+  }, 0);
 
   // Calculate shipping estimate based on total weight
-  const shippingEstimate = totalWeight >= 1000 ? Math.floor(totalWeight / 1000) * secondKillo + fistKillo : fistKillo
+  const shippingEstimate =
+    totalWeight >= 1000
+      ? Math.floor(totalWeight / 1000) * secondKillo + fistKillo
+      : fistKillo;
 
-  const orderTotal = subtotal + shippingEstimate
+  const orderTotal = subtotal + shippingEstimate;
 
   const handleScrollToEl = (id: string) => {
-    const element = document.getElementById(id)
+    const element = document.getElementById(id);
     setTimeout(() => {
-      element?.scrollIntoView({ behavior: "smooth" })
-    }, 80)
-  }
+      element?.scrollIntoView({ behavior: "smooth" });
+    }, 80);
+  };
 
   // Validation function
   const validateFields = () => {
-    const newErrors: any = {}
-    if (!firstName) newErrors.firstName = "First name is required."
-    if (!lastName) newErrors.lastName = "Last name is required."
-    if (!address1) newErrors.address1 = "Address is required."
-    if (!city) newErrors.city = "City is required."
+    const newErrors: any = {};
+    if (!firstName) newErrors.firstName = "First name is required.";
+    if (!lastName) newErrors.lastName = "Last name is required.";
+    if (!address1) newErrors.address1 = "Address is required.";
+    if (!city) newErrors.city = "City is required.";
     if (!phone1) {
-      newErrors.phone1 = "Phone number 1 is required."
+      newErrors.phone1 = "Phone number 1 is required.";
     } else if (!/^\d{10}$/.test(phone1)) {
-      newErrors.phone1 = "Phone number 1 must be 10 digits."
+      newErrors.phone1 = "Phone number 1 must be 10 digits.";
     }
-    if (!province) newErrors.province = "Province is required."
+    if (!province) newErrors.province = "Province is required.";
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmitOrder = async () => {
     if (!validateFields()) {
-      return // Stop form submission if validation fails
+      return; // Stop form submission if validation fails
     }
 
     const orderDetails = cart.map((item) => ({
@@ -138,7 +155,7 @@ const CheckoutPage = () => {
       price: item.product.product_price,
       quantity: item.quantity,
       subTotal: item.product.product_price * item.quantity,
-    }))
+    }));
 
     const payload = {
       firstName,
@@ -156,32 +173,36 @@ const CheckoutPage = () => {
       delivery: shippingEstimate,
       sub_total: subtotal,
       paymentMethod,
-    }
+    };
 
     try {
-      const response = await fetch(`${serverUrl}/api/customerOrderSave/saveOrder`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      })
+      const response = await fetch(
+        `${serverUrl}/api/customerOrderSave/saveOrder`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (response.ok) {
-        const data = await response.json() // Assuming the server returns an order ID
-        const generatedOrderId = data.orderId // Extract the order ID from the response
-        setOrderId(`#${generatedOrderId}`) // Format the order ID (e.g., #P000001)
-        console.log("Order placed successfully")
-        setIsModalOpen(true) // Open the modal
+        const data = await response.json(); // Assuming the server returns an order ID
+        const generatedOrderId = data.orderId; // Extract the order ID from the response
+        setOrderId(`#${generatedOrderId}`); // Format the order ID (e.g., #P000001)
+        console.log("Order placed successfully");
+        setIsModalOpen(true); // Open the modal
+      
       } else {
-        throw new Error("Failed to place order")
+        throw new Error("Failed to place order");
       }
     } catch (error) {
-      console.error("Error placing order:", error)
-    }
-  }
+      console.error("Error placing order:", error);
+    } 
+  };
 
-  const isCartEmpty = cart.length === 0
+  const isCartEmpty = cart.length === 0;
 
   // Modal component
   const OrderSuccessModal = () => {
@@ -227,28 +248,31 @@ const CheckoutPage = () => {
           >
             Order Successful!
           </h2>
-          <p style={{ margin: "15px" }}>Your order has been placed successfully.</p>
+          <p style={{ margin: "15px" }}>
+            Your order has been placed successfully.
+          </p>
           <p>
             <strong>Your Order ID:</strong> {orderId}
           </p>
           <ButtonPrimary
             className="mt-8 w-full"
             onClick={() => {
-              setIsModalOpen(false) // Close the modal
-              navigate("/") // Redirect to the dashboard
+              setIsModalOpen(false); // Close the modal
+              navigate("/"); // Redirect to the dashboard
+              clearCart();
             }}
           >
             Close
           </ButtonPrimary>
         </div>
       </>
-    )
-  }
+    );
+  };
 
   const renderProduct = (item: CartItem, index: number) => {
-    const { product, quantity } = item
-    const { image_url, product_price, product_name, weight } = product
-    const productSubtotal = product_price * quantity
+    const { product, quantity } = item;
+    const { image_url, product_price, product_name, weight } = product;
+    const productSubtotal = product_price * quantity;
 
     return (
       <div key={index} className="relative flex py-7 first:pt-0 last:pb-0">
@@ -284,7 +308,12 @@ const CheckoutPage = () => {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -293,7 +322,12 @@ const CheckoutPage = () => {
                 {/* Decrease Quantity Button */}
                 <button
                   className="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded-md"
-                  onClick={() => updateQuantity(product.product_id, Math.max(1, quantity - 1))} // Ensure it doesn't go below 1
+                  onClick={() =>
+                    updateQuantity(
+                      product.product_id,
+                      Math.max(1, quantity - 1)
+                    )
+                  } // Ensure it doesn't go below 1
                 >
                   -
                 </button>
@@ -302,7 +336,9 @@ const CheckoutPage = () => {
                 {/* Increase Quantity Button */}
                 <button
                   className="px-2 py-1 border border-slate-200 dark:border-slate-700 rounded-md"
-                  onClick={() => updateQuantity(product.product_id, quantity + 1)}
+                  onClick={() =>
+                    updateQuantity(product.product_id, quantity + 1)
+                  }
                 >
                   +
                 </button>
@@ -315,8 +351,8 @@ const CheckoutPage = () => {
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   const renderLeft = () => {
     return (
@@ -368,7 +404,9 @@ const CheckoutPage = () => {
                   value={phone1}
                   onChange={(e) => setPhone1(e.target.value)}
                 />
-                {errors.phone1 && <p className="text-red-500 text-sm">{errors.phone1}</p>}
+                {errors.phone1 && (
+                  <p className="text-red-500 text-sm">{errors.phone1}</p>
+                )}
               </div>
               <div className="max-w-lg">
                 <Label className="text-sm">Your phone number 2</Label>
@@ -389,7 +427,9 @@ const CheckoutPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email}</p>
+                )}
               </div>
             </div>
           </div>
@@ -444,7 +484,9 @@ const CheckoutPage = () => {
               </span>
               <div className="sm:ml-8">
                 <h3 className=" text-slate-700 dark:text-slate-300 flex ">
-                  <span className="uppercase tracking-tight">SHIPPING ADDRESS</span>
+                  <span className="uppercase tracking-tight">
+                    SHIPPING ADDRESS
+                  </span>
                 </h3>
               </div>
             </div>
@@ -452,36 +494,70 @@ const CheckoutPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
                 <div>
                   <Label className="text-sm">First name</Label>
-                  <Input className="mt-1.5" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                  {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
+                  <Input
+                    className="mt-1.5"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                  {errors.firstName && (
+                    <p className="text-red-500 text-sm">{errors.firstName}</p>
+                  )}
                 </div>
                 <div>
                   <Label className="text-sm">Last name</Label>
-                  <Input className="mt-1.5" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                  {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
+                  <Input
+                    className="mt-1.5"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                  {errors.lastName && (
+                    <p className="text-red-500 text-sm">{errors.lastName}</p>
+                  )}
                 </div>
               </div>
               <div className="sm:flex space-y-4 sm:space-y-0 sm:space-x-3">
                 <div className="flex-1">
                   <Label className="text-sm">Address 1</Label>
-                  <Input className="mt-1.5" value={address1} onChange={(e) => setAddress1(e.target.value)} />
-                  {errors.address1 && <p className="text-red-500 text-sm">{errors.address1}</p>}
+                  <Input
+                    className="mt-1.5"
+                    value={address1}
+                    onChange={(e) => setAddress1(e.target.value)}
+                  />
+                  {errors.address1 && (
+                    <p className="text-red-500 text-sm">{errors.address1}</p>
+                  )}
                 </div>
                 <div className="flex-1">
                   <Label className="text-sm">Address 2</Label>
-                  <Input className="mt-1.5" value={address2} onChange={(e) => setAddress2(e.target.value)} />
+                  <Input
+                    className="mt-1.5"
+                    value={address2}
+                    onChange={(e) => setAddress2(e.target.value)}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
                 <div>
                   <Label className="text-sm">City</Label>
-                  <Input className="mt-1.5" value={city} onChange={(e) => setCity(e.target.value)} />
-                  {errors.city && <p className="text-red-500 text-sm">{errors.city}</p>}
+                  <Input
+                    className="mt-1.5"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                  {errors.city && (
+                    <p className="text-red-500 text-sm">{errors.city}</p>
+                  )}
                 </div>
                 <div>
                   <Label className="text-sm">State/Province</Label>
-                  <Input className="mt-1.5" value={province} onChange={(e) => setProvince(e.target.value)} />
-                  {errors.province && <p className="text-red-500 text-sm">{errors.province}</p>}
+                  <Input
+                    className="mt-1.5"
+                    value={province}
+                    onChange={(e) => setProvince(e.target.value)}
+                  />
+                  {errors.province && (
+                    <p className="text-red-500 text-sm">{errors.province}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -540,7 +616,9 @@ const CheckoutPage = () => {
               </span>
               <div className="sm:ml-8">
                 <h3 className="text-slate-700 dark:text-slate-400 flex">
-                  <span className="uppercase tracking-tight">PAYMENT METHOD</span>
+                  <span className="uppercase tracking-tight">
+                    PAYMENT METHOD
+                  </span>
                 </h3>
               </div>
             </div>
@@ -655,7 +733,10 @@ const CheckoutPage = () => {
                   onChange={() => setPaymentMethod("CashOnDelivery")}
                 />
                 <div className="flex-1">
-                  <label htmlFor="Cash-on-Delivery" className="flex items-center space-x-4 sm:space-x-6">
+                  <label
+                    htmlFor="Cash-on-Delivery"
+                    className="flex items-center space-x-4 sm:space-x-6"
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -673,11 +754,41 @@ const CheckoutPage = () => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
-                      <rect x="10" y="4" width="10" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-                      <rect x="3" y="14" width="7" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
+                      <rect
+                        x="10"
+                        y="4"
+                        width="10"
+                        height="6"
+                        rx="1"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      />
+                      <rect
+                        x="3"
+                        y="14"
+                        width="7"
+                        height="4"
+                        rx="1"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      />
                       <circle cx="6.5" cy="16" r="0.75" fill="currentColor" />
-                      <line x1="3" y1="15" x2="10" y2="15" stroke="currentColor" strokeWidth="1.5" />
-                      <line x1="3" y1="17" x2="10" y2="17" stroke="currentColor" strokeWidth="1.5" />
+                      <line
+                        x1="3"
+                        y1="15"
+                        x2="10"
+                        y2="15"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      />
+                      <line
+                        x1="3"
+                        y1="17"
+                        x2="10"
+                        y2="17"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      />
                     </svg>
                     <p className="font-medium">Cash on Delivery</p>
                   </label>
@@ -687,14 +798,16 @@ const CheckoutPage = () => {
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="nc-CheckoutPage">
       <main className="container py-16 lg:pb-28 lg:pt-20">
         <div className="mb-16">
-          <h2 className="block text-2xl sm:text-3xl lg:text-4xl font-semibold">Checkout</h2>
+          <h2 className="block text-2xl sm:text-3xl lg:text-4xl font-semibold">
+            Checkout
+          </h2>
         </div>
 
         <div className="flex flex-col lg:flex-row">
@@ -704,16 +817,22 @@ const CheckoutPage = () => {
 
           <div className="w-full lg:w-[36%]">
             <h3 className="text-lg font-semibold">Order summary</h3>
-            <div className="mt-8 divide-y divide-slate-200/70 dark:divide-slate-700">{cart.map(renderProduct)}</div>
+            <div className="mt-8 divide-y divide-slate-200/70 dark:divide-slate-700">
+              {cart.map(renderProduct)}
+            </div>
 
             <div className="mt-10 pt-6 text-sm text-slate-500 dark:text-slate-400 border-t border-slate-200/70 dark:border-slate-700">
               <div className="mt-4 flex justify-between py-2.5">
                 <span>Subtotal</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-200">{`${subtotal.toFixed(2)}`}</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-200">{`${subtotal.toFixed(
+                  2
+                )}`}</span>
               </div>
               <div className="flex justify-between py-2.5">
                 <span>Shipping estimate({totalWeight}g)</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-200">{`${shippingEstimate.toFixed(2)}`}</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-200">{`${shippingEstimate.toFixed(
+                  2
+                )}`}</span>
               </div>
               <div className="flex justify-between font-semibold text-slate-900 dark:text-slate-200 text-base pt-4">
                 <span>Order total</span>
@@ -725,13 +844,14 @@ const CheckoutPage = () => {
               className="mt-8 w-full"
               disabled={isCartEmpty} // Disable the button if the cart is empty
             >
-              {isCartEmpty ? "Cart is Empty" : "Checkout"} {/* Change button text dynamically */}
+              {isCartEmpty ? "Cart is Empty" : "Checkout"}{" "}
+              {/* Change button text dynamically */}
             </ButtonPrimary>
           </div>
         </div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default CheckoutPage
+export default CheckoutPage;

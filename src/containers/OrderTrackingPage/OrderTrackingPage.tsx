@@ -9,7 +9,7 @@ import Prices from "components/Prices"
 
 interface OrderStatus {
   id: string
-  status: "pending" | "processing" | "on_the_way" | "delivered" | "cancelled" | "returned"
+  status: "Pending" | "Preparing" | "On the way" | "Delivered" | "Cancelled" | "Returned"
   timestamp: string
   description: string
 }
@@ -89,27 +89,26 @@ const OrderTrackingPage: React.FC = () => {
   // Map API order status to component status (only the requested statuses)
   const mapOrderStatus = (apiStatus: string): OrderStatus["status"] => {
     switch (apiStatus.toLowerCase()) {
-      case "pending":
-        return "pending"
-      case "confirmed":
-      case "preparing":
-      case "processing":
-        return "processing"
-      case "shipped":
-      case "out_for_delivery":
-      case "on_the_way":
-        return "on_the_way"
-      case "delivered":
-        return "delivered"
-      case "cancelled":
-      case "cancel":
-        return "cancelled"
-      case "returned":
-      case "return":
-        return "returned"
-      default:
-        return "pending"
-    }
+  case "pending":
+    return "Pending";
+  case "confirmed":
+  case "preparing":
+    return "Preparing";
+  case "shipped":
+  case "out_for_delivery":
+  case "on the way":
+    return "On the way";
+  case "delivered":
+    return "Delivered";
+  case "cancelled":
+  case "cancel":
+    return "Cancelled";
+  case "returned":
+  case "return":
+    return "Returned";
+  default:
+    return "Pending";
+}
   }
 
   // Format date string
@@ -178,7 +177,7 @@ const OrderTrackingPage: React.FC = () => {
         prev
           ? {
               ...prev,
-              currentStatus: "cancelled",
+              currentStatus: "Cancelled",
             }
           : null,
       )
@@ -243,7 +242,7 @@ const OrderTrackingPage: React.FC = () => {
           statusHistory: [
             {
               id: "1",
-              status: "pending",
+              status: "Pending",
               timestamp: formatDate(apiData.order.created_date) + " - Order Placed",
               description: `Order placed successfully with ${apiData.order.payment} payment method`,
             },
@@ -276,17 +275,17 @@ const OrderTrackingPage: React.FC = () => {
 
   const getStatusColor = (status: OrderStatus["status"]) => {
     switch (status) {
-      case "pending":
+      case "Pending":
         return "text-yellow-700 bg-yellow-100 dark:text-yellow-300 dark:bg-yellow-900"
-      case "processing":
+      case "Preparing":
         return "text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900"
-      case "on_the_way":
+      case "On the way":
         return "text-purple-700 bg-purple-100 dark:text-purple-300 dark:bg-purple-900"
-      case "delivered":
+      case "Delivered":
         return "text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900"
-      case "cancelled":
+      case "Cancelled":
         return "text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-900"
-      case "returned":
+      case "Returned":
         return "text-orange-700 bg-orange-100 dark:text-orange-300 dark:bg-orange-900"
       default:
         return "text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-900"
@@ -295,17 +294,17 @@ const OrderTrackingPage: React.FC = () => {
 
   const getStatusText = (status: OrderStatus["status"]) => {
     switch (status) {
-      case "pending":
+      case "Pending":
         return "Pending"
-      case "processing":
-        return "Processing"
-      case "on_the_way":
+      case "Preparing":
+        return "Preparing"
+      case "On the way":
         return "On the way"
-      case "delivered":
+      case "Delivered":
         return "Delivered"
-      case "cancelled":
+      case "Cancelled":
         return "Cancel"
-      case "returned":
+      case "Returned":
         return "Return"
       default:
         return "Unknown Status"
@@ -314,17 +313,17 @@ const OrderTrackingPage: React.FC = () => {
 
   const getStatusDescription = (status: OrderStatus["status"]) => {
     switch (status) {
-      case "pending":
+      case "Pending":
         return "Order has been placed and is pending confirmation"
-      case "processing":
+      case "Preparing":
         return "Order is being prepared and processed"
-      case "on_the_way":
+      case "On the way":
         return "Order is on the way to your delivery address"
-      case "delivered":
+      case "Delivered":
         return "Order has been successfully delivered"
-      case "cancelled":
+      case "Cancelled":
         return "Order has been cancelled"
-      case "returned":
+      case "Returned":
         return "Order has been returned"
       default:
         return "Status update"
@@ -505,7 +504,7 @@ const OrderTrackingPage: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {orderDetails.currentStatus === "pending" && (
+            {orderDetails.currentStatus === "Pending" && (
               <ButtonSecondary
                 onClick={handleCancelConfirm}
                 disabled={!isOrderCancellable(orderDetails.orderDate) || cancelLoading}
@@ -568,7 +567,7 @@ const OrderTrackingPage: React.FC = () => {
           )}
 
           {/* Show cancellation info for pending orders */}
-          {orderDetails.currentStatus === "pending" && !isOrderCancellable(orderDetails.orderDate) && (
+          {orderDetails.currentStatus === "Pending" && !isOrderCancellable(orderDetails.orderDate) && (
             <div className="text-center mt-4">
               <p className="text-slate-500 dark:text-slate-400 text-sm">
                 Order cancellation is only available within 24 hours of placement.
