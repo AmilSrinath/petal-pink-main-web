@@ -54,10 +54,12 @@ const SectionClientSay: FC<SectionClientSayProps> = ({ className = "" }) => {
     };
   }, [UNIQUE_CLASS]);
 
+  const serverUrl = process.env.REACT_APP_API_URL
+
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await fetch("http://localhost:4000/api/configuration/getAllComments");
+        const response = await fetch(`${serverUrl}/api/configuration/getAllComments`);
         if (!response.ok) {
           throw new Error("Failed to fetch comments");
         }

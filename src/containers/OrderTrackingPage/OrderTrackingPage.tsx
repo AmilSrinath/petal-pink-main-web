@@ -1,162 +1,169 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { useParams } from "react-router-dom"
-import ButtonPrimary from "shared/Button/ButtonPrimary"
-import ButtonSecondary from "shared/Button/ButtonSecondary"
-import Prices from "components/Prices"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import ButtonPrimary from "shared/Button/ButtonPrimary";
+import ButtonSecondary from "shared/Button/ButtonSecondary";
+import Prices from "components/Prices";
 
 interface OrderStatus {
-  id: string
-  status: "Pending" | "Preparing" | "On the way" | "Delivered" | "Cancelled" | "Returned"
-  timestamp: string
-  description: string
+  id: string;
+  status:
+    | "Pending"
+    | "Preparing"
+    | "On the way"
+    | "Delivered"
+    | "Cancelled"
+    | "Returned";
+  timestamp: string;
+  description: string;
 }
 
 interface OrderItem {
-  id: string
-  name: string
-  image_url: string
-  price: number
-  quantity: number
-  variant: string
-  size: string
+  id: string;
+  name: string;
+  image_url: string;
+  price: number;
+  quantity: number;
+  variant: string;
+  size: string;
 }
 
 interface OrderDetails {
-  orderId: string
-  orderDate: string
-  estimatedDelivery: string
-  totalAmount: number
-  deliveryAmount: number
-  subTotal: number
-  paymentMethod: string
+  orderId: string;
+  orderDate: string;
+  estimatedDelivery: string;
+  totalAmount: number;
+  deliveryAmount: number;
+  subTotal: number;
+  paymentMethod: string;
   shippingAddress: {
-    name: string
-    address: string
-    city: string
-    zipCode: string
-    phone: string
-    email: string
-  }
-  items: OrderItem[]
-  currentStatus: OrderStatus["status"]
-  statusHistory: OrderStatus[]
-  trackingNumber?: string
+    name: string;
+    address: string;
+    city: string;
+    zipCode: string;
+    phone: string;
+    email: string;
+  };
+  items: OrderItem[];
+  currentStatus: OrderStatus["status"];
+  statusHistory: OrderStatus[];
+  trackingNumber?: string;
 }
 
 // API Response interfaces
 interface ApiOrderResponse {
   order: {
-    order_id: string
-    created_date: string
-    payment: string
-    total: number
-    delivery: number
-    sub_total: number
-    order_status: string
-    cus_id: number
-    first_name: string
-    last_name: string
-    address1: string
-    address2: string
-    city: string
-    email: string
-    phone_1: string
-    phone_2: string
-    province: string
-    country: string
-  }
+    order_id: string;
+    created_date: string;
+    payment: string;
+    total: number;
+    delivery: number;
+    sub_total: number;
+    order_status: string;
+    cus_id: number;
+    first_name: string;
+    last_name: string;
+    address1: string;
+    address2: string;
+    city: string;
+    email: string;
+    phone_1: string;
+    phone_2: string;
+    province: string;
+    country: string;
+    tracking_number: string
+  };
   items: Array<{
-    product_name: string
-    quantity: number
-    price: number
-    sub_total: number
-    image_url: string
-  }>
+    product_name: string;
+    quantity: number;
+    price: number;
+    sub_total: number;
+    image_url: string;
+  }>;
 }
 
 const OrderTrackingPage: React.FC = () => {
-  const { orderId } = useParams<{ orderId: string }>()
-  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [cancelLoading, setCancelLoading] = useState(false)
-  const [cancelError, setCancelError] = useState<string | null>(null)
-  const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const { orderId } = useParams<{ orderId: string }>();
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   // Map API order status to component status (only the requested statuses)
   const mapOrderStatus = (apiStatus: string): OrderStatus["status"] => {
-    switch (apiStatus.toLowerCase()) {
-  case "pending":
-    return "Pending";
-  case "confirmed":
-  case "preparing":
-    return "Preparing";
-  case "shipped":
-  case "out_for_delivery":
-  case "on the way":
-    return "On the way";
-  case "delivered":
-    return "Delivered";
-  case "cancelled":
-  case "cancel":
-    return "Cancelled";
-  case "returned":
-  case "return":
-    return "Returned";
-  default:
-    return "Pending";
-}
-  }
+    switch (apiStatus) {
+      case "pending":
+        return "Pending";
+      case "confirmed":
+      case "preparing":
+        return "Preparing";
+      case "shipped":
+      case "out_for_delivery":
+      case "on the way":
+        return "On the way";
+      case "delivered":
+        return "Delivered";
+      case "cancelled":
+      case "cancel":
+        return "Cancelled";
+      case "returned":
+      case "return":
+        return "Returned";
+      default:
+        return "Pending";
+    }
+  };
 
   // Format date string
   const formatDate = (dateString: string): string => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   // Calculate estimated delivery (add 3-5 days to order date)
   const calculateEstimatedDelivery = (orderDate: string): string => {
-    const date = new Date(orderDate)
-    date.setDate(date.getDate() + 4) // Add 4 days as example
+    const date = new Date(orderDate);
+    date.setDate(date.getDate() + 4); // Add 4 days as example
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   // Check if 24 hours have passed since order placement
   const isOrderCancellable = (orderDate: string): boolean => {
-    const orderDateTime = new Date(orderDate)
-    const currentTime = new Date()
-    const timeDifference = currentTime.getTime() - orderDateTime.getTime()
-    const hoursDifference = timeDifference / (1000 * 3600) // Convert to hours
-    return hoursDifference < 24
-  }
+    const orderDateTime = new Date(orderDate);
+    const currentTime = new Date();
+    const timeDifference = currentTime.getTime() - orderDateTime.getTime();
+    const hoursDifference = timeDifference / (1000 * 3600); // Convert to hours
+    return hoursDifference < 24;
+  };
 
   // Handle order cancellation confirmation
   const handleCancelConfirm = () => {
-    setShowCancelDialog(true)
-  }
+    setShowCancelDialog(true);
+  };
 
   // Handle actual order cancellation after confirmation
   const handleCancelOrder = async () => {
-    if (!orderDetails) return
+    if (!orderDetails) return;
 
-    setShowCancelDialog(false)
-    setCancelLoading(true)
-    setCancelError(null)
-
+    setShowCancelDialog(false);
+    setCancelLoading(true);
+    setCancelError(null);
+    const serverUrl = process.env.REACT_APP_API_URL;
     try {
       const response = await fetch(
-        `http://localhost:4000/api/customerOrderSave/updateOrderStatus/${orderDetails.orderId}`,
+        `${serverUrl}/api/customerOrderSave/updateOrderStatus/${orderDetails.orderId}`,
         {
           method: "PUT",
           headers: {
@@ -165,11 +172,11 @@ const OrderTrackingPage: React.FC = () => {
           body: JSON.stringify({
             order_status: "Cancelled",
           }),
-        },
-      )
+        }
+      );
 
       if (!response.ok) {
-        throw new Error(`Failed to cancel order: ${response.status}`)
+        throw new Error(`Failed to cancel order: ${response.status}`);
       }
 
       // Update the order details to reflect cancellation
@@ -179,51 +186,57 @@ const OrderTrackingPage: React.FC = () => {
               ...prev,
               currentStatus: "Cancelled",
             }
-          : null,
-      )
+          : null
+      );
 
-      alert("Order cancelled successfully!")
+      alert("Order cancelled successfully!");
     } catch (err) {
-      console.error("Error cancelling order:", err)
-      setCancelError("Failed to cancel order. Please try again.")
+      console.error("Error cancelling order:", err);
+      setCancelError("Failed to cancel order. Please try again.");
     } finally {
-      setCancelLoading(false)
+      setCancelLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
       if (!orderId) {
-        setError("Order ID is required")
-        setLoading(false)
-        return
+        setError("Order ID is required");
+        setLoading(false);
+        return;
       }
 
-      setLoading(true)
-      setError(null)
-
+      setLoading(true);
+      setError(null);
+      const serverUrl = process.env.REACT_APP_API_URL
       try {
-        const response = await fetch(`http://localhost:4000/api/customerOrderSave/getOrderDetails/${orderId}`)
+        const response = await fetch(
+          `${serverUrl}/api/customerOrderSave/getOrderDetails/${orderId}`
+        );
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const apiData: ApiOrderResponse = await response.json()
+        const apiData: ApiOrderResponse = await response.json();
 
         // Map API response to component structure
         const mappedOrderDetails: OrderDetails = {
           orderId: apiData.order.order_id,
           orderDate: formatDate(apiData.order.created_date),
-          estimatedDelivery: calculateEstimatedDelivery(apiData.order.created_date),
+          estimatedDelivery: calculateEstimatedDelivery(
+            apiData.order.created_date
+          ),
           totalAmount: apiData.order.total,
           deliveryAmount: apiData.order.delivery,
           subTotal: apiData.order.sub_total,
           paymentMethod: apiData.order.payment,
-          trackingNumber: "TRK" + apiData.order.order_id.slice(-6),
+          trackingNumber: apiData.order.tracking_number || "No tracking",
           shippingAddress: {
             name: `${apiData.order.first_name} ${apiData.order.last_name}`,
-            address: `${apiData.order.address1}${apiData.order.address2 ? ", " + apiData.order.address2 : ""}`,
+            address: `${apiData.order.address1}${
+              apiData.order.address2 ? ", " + apiData.order.address2 : ""
+            }`,
             city: `${apiData.order.city}, ${apiData.order.province}`,
             zipCode: apiData.order.country,
             phone: apiData.order.phone_1,
@@ -243,7 +256,8 @@ const OrderTrackingPage: React.FC = () => {
             {
               id: "1",
               status: "Pending",
-              timestamp: formatDate(apiData.order.created_date) + " - Order Placed",
+              timestamp:
+                formatDate(apiData.order.created_date) + " - Order Placed",
               description: `Order placed successfully with ${apiData.order.payment} payment method`,
             },
             {
@@ -256,79 +270,79 @@ const OrderTrackingPage: React.FC = () => {
                 hour: "2-digit",
                 minute: "2-digit",
               }),
-              description: `Order is currently ${apiData.order.order_status.toLowerCase()}`,
+              description: `Order is currently ${apiData.order.order_status}`,
             },
           ],
-        }
+        };
 
-        setOrderDetails(mappedOrderDetails)
+        setOrderDetails(mappedOrderDetails);
       } catch (err) {
-        console.error("Error fetching order details:", err)
-        setError("Failed to fetch order details. Please try again.")
+        console.error("Error fetching order details:", err);
+        setError("Failed to fetch order details. Please try again.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchOrderDetails()
-  }, [orderId])
+    fetchOrderDetails();
+  }, [orderId]);
 
   const getStatusColor = (status: OrderStatus["status"]) => {
     switch (status) {
       case "Pending":
-        return "text-yellow-700 bg-yellow-100 dark:text-yellow-300 dark:bg-yellow-900"
+        return "text-yellow-700 bg-yellow-100 dark:text-yellow-300 dark:bg-yellow-900";
       case "Preparing":
-        return "text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900"
+        return "text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900";
       case "On the way":
-        return "text-purple-700 bg-purple-100 dark:text-purple-300 dark:bg-purple-900"
+        return "text-purple-700 bg-purple-100 dark:text-purple-300 dark:bg-purple-900";
       case "Delivered":
-        return "text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900"
+        return "text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900";
       case "Cancelled":
-        return "text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-900"
+        return "text-red-700 bg-red-100 dark:text-red-300 dark:bg-red-900";
       case "Returned":
-        return "text-orange-700 bg-orange-100 dark:text-orange-300 dark:bg-orange-900"
+        return "text-orange-700 bg-orange-100 dark:text-orange-300 dark:bg-orange-900";
       default:
-        return "text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-900"
+        return "text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-gray-900";
     }
-  }
+  };
 
   const getStatusText = (status: OrderStatus["status"]) => {
     switch (status) {
       case "Pending":
-        return "Pending"
+        return "Pending";
       case "Preparing":
-        return "Preparing"
+        return "Preparing";
       case "On the way":
-        return "On the way"
+        return "On the way";
       case "Delivered":
-        return "Delivered"
+        return "Delivered";
       case "Cancelled":
-        return "Cancel"
+        return "Cancel";
       case "Returned":
-        return "Return"
+        return "Return";
       default:
-        return "Unknown Status"
+        return "Unknown Status";
     }
-  }
+  };
 
   const getStatusDescription = (status: OrderStatus["status"]) => {
     switch (status) {
       case "Pending":
-        return "Order has been placed and is pending confirmation"
+        return "Order has been placed and is pending confirmation";
       case "Preparing":
-        return "Order is being prepared and processed"
+        return "Order is being prepared and processed";
       case "On the way":
-        return "Order is on the way to your delivery address"
+        return "Order is on the way to your delivery address";
       case "Delivered":
-        return "Order has been successfully delivered"
+        return "Order has been successfully delivered";
       case "Cancelled":
-        return "Order has been cancelled"
+        return "Order has been cancelled";
       case "Returned":
-        return "Order has been returned"
+        return "Order has been returned";
       default:
-        return "Status update"
+        return "Status update";
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -342,7 +356,7 @@ const OrderTrackingPage: React.FC = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !orderDetails) {
@@ -355,17 +369,22 @@ const OrderTrackingPage: React.FC = () => {
                 {error || "Order Not Found"}
               </h2>
               <p className="text-slate-500 dark:text-slate-400 mb-6">
-                {error || "The order you're looking for doesn't exist or has been removed."}
+                {error ||
+                  "The order you're looking for doesn't exist or has been removed."}
               </p>
+              
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <ButtonSecondary href="/account-my-order">View All Orders</ButtonSecondary>
+                {/* <ButtonSecondary href="/account-my-order">
+                  View All Orders
+                </ButtonSecondary> */}
                 <ButtonPrimary href="/">Continue Shopping</ButtonPrimary>
               </div>
+            
             </div>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -374,8 +393,12 @@ const OrderTrackingPage: React.FC = () => {
         {/* Header */}
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl lg:text-4xl font-semibold text-slate-900 dark:text-slate-100">Order Tracking</h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-2">Track your order status and delivery information</p>
+            <h1 className="text-3xl lg:text-4xl font-semibold text-slate-900 dark:text-slate-100">
+              Order Tracking
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-2">
+              Track your order status and delivery information
+            </p>
           </div>
 
           {/* Order Summary Card */}
@@ -388,12 +411,16 @@ const OrderTrackingPage: React.FC = () => {
                 <div className="space-y-1 text-slate-600 dark:text-slate-300">
                   <p>Placed on {orderDetails.orderDate}</p>
                   <p>Payment: {orderDetails.paymentMethod}</p>
-                  {orderDetails.trackingNumber && <p>Tracking: {orderDetails.trackingNumber}</p>}
+                  {orderDetails.trackingNumber && (
+                    <p>Tracking: {orderDetails.trackingNumber}</p>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col items-start lg:items-end">
                 <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-2 ${getStatusColor(orderDetails.currentStatus)}`}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-2 ${getStatusColor(
+                    orderDetails.currentStatus
+                  )}`}
                 >
                   {getStatusText(orderDetails.currentStatus)}
                 </span>
@@ -405,9 +432,13 @@ const OrderTrackingPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3">Shipping Address</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3">
+                  Shipping Address
+                </h3>
                 <div className="text-slate-600 dark:text-slate-300 space-y-1">
-                  <p className="font-medium">{orderDetails.shippingAddress.name}</p>
+                  <p className="font-medium">
+                    {orderDetails.shippingAddress.name}
+                  </p>
                   <p>{orderDetails.shippingAddress.address}</p>
                   <p>{orderDetails.shippingAddress.city}</p>
                   <p>{orderDetails.shippingAddress.phone}</p>
@@ -415,7 +446,9 @@ const OrderTrackingPage: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3">Delivery Information</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3">
+                  Delivery Information
+                </h3>
                 <div className="text-slate-600 dark:text-slate-300 space-y-1">
                   <p>
                     <span className="text-slate-500">Estimated Delivery:</span>{" "}
@@ -425,7 +458,9 @@ const OrderTrackingPage: React.FC = () => {
                   </p>
                   <p>
                     <span className="text-slate-500">Delivery Fee:</span>{" "}
-                    <span className="font-medium">Rs. {orderDetails.deliveryAmount}</span>
+                    <span className="font-medium">
+                      Rs. {orderDetails.deliveryAmount}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -434,7 +469,9 @@ const OrderTrackingPage: React.FC = () => {
 
           {/* Order Status Timeline */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 mb-8 border border-slate-200 dark:border-slate-700">
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6">Current Order Status</h3>
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6">
+              Current Order Status
+            </h3>
             <div className="flex items-center justify-center">
               <div className="text-center">
                 <h4 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -466,13 +503,18 @@ const OrderTrackingPage: React.FC = () => {
                     />
                   </div>
                   <div className="ml-4 flex-1 min-w-0">
-                    <h4 className="font-medium text-slate-900 dark:text-slate-100 truncate">{item.name}</h4>
+                    <h4 className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                      {item.name}
+                    </h4>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                       Qty: {item.quantity}
                     </p>
                   </div>
                   <div className="text-right ml-4">
-                    <Prices price={item.price * item.quantity} className="text-lg font-semibold" />
+                    <Prices
+                      price={item.price * item.quantity}
+                      className="text-lg font-semibold"
+                    />
                   </div>
                 </div>
               ))}
@@ -481,19 +523,25 @@ const OrderTrackingPage: React.FC = () => {
             <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600 dark:text-slate-300">Subtotal:</span>
+                  <span className="text-slate-600 dark:text-slate-300">
+                    Subtotal:
+                  </span>
                   <span className="font-medium text-slate-900 dark:text-slate-100">
                     Rs. {orderDetails.subTotal.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600 dark:text-slate-300">Delivery:</span>
+                  <span className="text-slate-600 dark:text-slate-300">
+                    Delivery:
+                  </span>
                   <span className="font-medium text-slate-900 dark:text-slate-100">
                     Rs. {orderDetails.deliveryAmount.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center border-t border-slate-200 dark:border-slate-700 pt-2">
-                  <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">Total Amount:</span>
+                  <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                    Total Amount:
+                  </span>
                   <span className="text-xl font-bold text-slate-900 dark:text-slate-100">
                     Rs. {orderDetails.totalAmount.toLocaleString()}
                   </span>
@@ -507,8 +555,14 @@ const OrderTrackingPage: React.FC = () => {
             {orderDetails.currentStatus === "Pending" && (
               <ButtonSecondary
                 onClick={handleCancelConfirm}
-                disabled={!isOrderCancellable(orderDetails.orderDate) || cancelLoading}
-                className={`${!isOrderCancellable(orderDetails.orderDate) ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={
+                  !isOrderCancellable(orderDetails.orderDate) || cancelLoading
+                }
+                className={`${
+                  !isOrderCancellable(orderDetails.orderDate)
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
               >
                 {cancelLoading ? "Cancelling..." : "Order Cancel"}
               </ButtonSecondary>
@@ -536,9 +590,12 @@ const OrderTrackingPage: React.FC = () => {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Cancel Order?</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                    Cancel Order?
+                  </h3>
                   <p className="text-slate-600 dark:text-slate-300 mb-6">
-                    Are you sure you want to cancel this order? This action cannot be undone.
+                    Are you sure you want to cancel this order? This action
+                    cannot be undone.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <button
@@ -562,22 +619,26 @@ const OrderTrackingPage: React.FC = () => {
           {/* Show cancellation error if any */}
           {cancelError && (
             <div className="text-center mt-4">
-              <p className="text-red-600 dark:text-red-400 text-sm">{cancelError}</p>
+              <p className="text-red-600 dark:text-red-400 text-sm">
+                {cancelError}
+              </p>
             </div>
           )}
 
           {/* Show cancellation info for pending orders */}
-          {orderDetails.currentStatus === "Pending" && !isOrderCancellable(orderDetails.orderDate) && (
-            <div className="text-center mt-4">
-              <p className="text-slate-500 dark:text-slate-400 text-sm">
-                Order cancellation is only available within 24 hours of placement.
-              </p>
-            </div>
-          )}
+          {orderDetails.currentStatus === "Pending" &&
+            !isOrderCancellable(orderDetails.orderDate) && (
+              <div className="text-center mt-4">
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
+                  Order cancellation is only available within 24 hours of
+                  placement.
+                </p>
+              </div>
+            )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default OrderTrackingPage
+export default OrderTrackingPage;
