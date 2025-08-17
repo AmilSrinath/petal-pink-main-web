@@ -198,94 +198,94 @@ const OrderTrackingPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      if (!orderId) {
-        setError("Order ID is required");
-        setLoading(false);
-        return;
-      }
+  // useEffect(() => {
+  //   const fetchOrderDetails = async () => {
+  //     if (!orderId) {
+  //       setError("Order ID is required");
+  //       setLoading(false);
+  //       return;
+  //     }
 
-      setLoading(true);
-      setError(null);
-      const serverUrl = process.env.REACT_APP_API_URL
-      try {
-        const response = await fetch(
-          `${serverUrl}/api/customerOrderSave/getOrderDetails/${orderId}`
-        );
+  //     setLoading(true);
+  //     setError(null);
+  //     const serverUrl = process.env.REACT_APP_API_URL
+  //     try {
+  //       const response = await fetch(
+  //         `${serverUrl}/api/customerOrderSave/getOrderDetails/${orderId}`
+  //       );
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! status: ${response.status}`);
+  //       }
 
-        const apiData: ApiOrderResponse = await response.json();
+  //       const apiData: ApiOrderResponse = await response.json();
 
-        // Map API response to component structure
-        const mappedOrderDetails: OrderDetails = {
-          orderId: apiData.order.order_id,
-          orderDate: formatDate(apiData.order.created_date),
-          estimatedDelivery: calculateEstimatedDelivery(
-            apiData.order.created_date
-          ),
-          totalAmount: apiData.order.total,
-          deliveryAmount: apiData.order.delivery,
-          subTotal: apiData.order.sub_total,
-          paymentMethod: apiData.order.payment,
-          trackingNumber: apiData.order.tracking_number || "No tracking",
-          shippingAddress: {
-            name: `${apiData.order.first_name} ${apiData.order.last_name}`,
-            address: `${apiData.order.address1}${
-              apiData.order.address2 ? ", " + apiData.order.address2 : ""
-            }`,
-            city: `${apiData.order.city}, ${apiData.order.province}`,
-            zipCode: apiData.order.country,
-            phone: apiData.order.phone_1,
-            email: apiData.order.email,
-          },
-          items: apiData.items.map((item, index) => ({
-            id: index.toString(),
-            name: item.product_name,
-            image_url: item.image_url,
-            price: item.price,
-            quantity: item.quantity,
-            variant: "Standard",
-            size: "Standard",
-          })),
-          currentStatus: mapOrderStatus(apiData.order.order_status),
-          statusHistory: [
-            {
-              id: "1",
-              status: "Pending",
-              timestamp:
-                formatDate(apiData.order.created_date) + " - Order Placed",
-              description: `Order placed successfully with ${apiData.order.payment} payment method`,
-            },
-            {
-              id: "2",
-              status: mapOrderStatus(apiData.order.order_status),
-              timestamp: new Date().toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-              description: `Order is currently ${apiData.order.order_status}`,
-            },
-          ],
-        };
+  //       // Map API response to component structure
+  //       const mappedOrderDetails: OrderDetails = {
+  //         orderId: apiData.order.order_id,
+  //         orderDate: formatDate(apiData.order.created_date),
+  //         estimatedDelivery: calculateEstimatedDelivery(
+  //           apiData.order.created_date
+  //         ),
+  //         totalAmount: apiData.order.total,
+  //         deliveryAmount: apiData.order.delivery,
+  //         subTotal: apiData.order.sub_total,
+  //         paymentMethod: apiData.order.payment,
+  //         trackingNumber: apiData.order.tracking_number || "No tracking",
+  //         shippingAddress: {
+  //           name: `${apiData.order.first_name} ${apiData.order.last_name}`,
+  //           address: `${apiData.order.address1}${
+  //             apiData.order.address2 ? ", " + apiData.order.address2 : ""
+  //           }`,
+  //           city: `${apiData.order.city}, ${apiData.order.province}`,
+  //           zipCode: apiData.order.country,
+  //           phone: apiData.order.phone_1,
+  //           email: apiData.order.email,
+  //         },
+  //         items: apiData.items.map((item, index) => ({
+  //           id: index.toString(),
+  //           name: item.product_name,
+  //           image_url: item.image_url,
+  //           price: item.price,
+  //           quantity: item.quantity,
+  //           variant: "Standard",
+  //           size: "Standard",
+  //         })),
+  //         currentStatus: mapOrderStatus(apiData.order.order_status),
+  //         statusHistory: [
+  //           {
+  //             id: "1",
+  //             status: "Pending",
+  //             timestamp:
+  //               formatDate(apiData.order.created_date) + " - Order Placed",
+  //             description: `Order placed successfully with ${apiData.order.payment} payment method`,
+  //           },
+  //           {
+  //             id: "2",
+  //             status: mapOrderStatus(apiData.order.order_status),
+  //             timestamp: new Date().toLocaleDateString("en-US", {
+  //               year: "numeric",
+  //               month: "short",
+  //               day: "numeric",
+  //               hour: "2-digit",
+  //               minute: "2-digit",
+  //             }),
+  //             description: `Order is currently ${apiData.order.order_status}`,
+  //           },
+  //         ],
+  //       };
 
-        setOrderDetails(mappedOrderDetails);
-      } catch (err) {
-        console.error("Error fetching order details:", err);
-        setError("Failed to fetch order details. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       setOrderDetails(mappedOrderDetails);
+  //     } catch (err) {
+  //       console.error("Error fetching order details:", err);
+  //       setError("Failed to fetch order details. Please try again.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchOrderDetails();
-  }, [orderId]);
+  //   fetchOrderDetails();
+  // }, [orderId]);
 
   const getStatusColor = (status: OrderStatus["status"]) => {
     switch (status) {
