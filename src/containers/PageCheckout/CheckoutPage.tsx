@@ -6,6 +6,7 @@ import ButtonPrimary from "shared/Button/ButtonPrimary";
 import Label from "../../components/Label/Label";
 import Input from "../../shared/Input/Input";
 import { useNavigate } from "react-router-dom";
+import Select from "react-select";
 
 // Define the types for the product and cart items
 interface Product {
@@ -20,6 +21,17 @@ interface CartItem {
   quantity: number;
 }
 
+const provinceOptions = [
+  { value: "central", label: "Central" },
+  { value: "eastern", label: "Eastern" },
+  { value: "northern", label: "Northern" },
+  { value: "southern", label: "Southern" },
+  { value: "western", label: "Western" },
+  { value: "north_central", label: "North Central" },
+  { value: "north_western", label: "North Western" },
+  { value: "uva", label: "Uva" },
+  { value: "sabaragamuwa", label: "Sabaragamuwa" },
+];
 const CheckoutPage = () => {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
   const navigate = useNavigate();
@@ -193,13 +205,12 @@ const CheckoutPage = () => {
         setOrderId(`#${generatedOrderId}`); // Format the order ID (e.g., #P000001)
         console.log("Order placed successfully");
         setIsModalOpen(true); // Open the modal
-      
       } else {
         throw new Error("Failed to place order");
       }
     } catch (error) {
       console.error("Error placing order:", error);
-    } 
+    }
   };
 
   const isCartEmpty = cart.length === 0;
@@ -549,11 +560,15 @@ const CheckoutPage = () => {
                   )}
                 </div>
                 <div>
-                  <Label className="text-sm">State/Province</Label>
-                  <Input
+                  <label className="text-sm">State/Province</label>
+                  <Select
                     className="mt-1.5"
-                    value={province}
-                    onChange={(e) => setProvince(e.target.value)}
+                    options={provinceOptions}
+                    value={provinceOptions.find(
+                      (opt) => opt.value === province
+                    )}
+                    onChange={(selected) => setProvince(selected?.value || "")}
+                    placeholder="Select a province"
                   />
                   {errors.province && (
                     <p className="text-red-500 text-sm">{errors.province}</p>

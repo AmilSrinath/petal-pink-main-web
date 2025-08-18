@@ -96,21 +96,21 @@ const OrderTrackingPage: React.FC = () => {
   // Map API order status to component status (only the requested statuses)
   const mapOrderStatus = (apiStatus: string): OrderStatus["status"] => {
     switch (apiStatus) {
-      case "pending":
+      case "Pending":
         return "Pending";
-      case "confirmed":
-      case "preparing":
+      case "Confirmed":
+      case "Preparing":
         return "Preparing";
-      case "shipped":
-      case "out_for_delivery":
-      case "on the way":
+      case "Shipped":
+      case "Out_for_delivery":
+      case "On the way":
         return "On the way";
-      case "delivered":
+      case "Delivered":
         return "Delivered";
-      case "cancelled":
+      case "Cancelled":
       case "cancel":
         return "Cancelled";
-      case "returned":
+      case "Returned":
       case "return":
         return "Returned";
       default:
